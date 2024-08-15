@@ -1,6 +1,6 @@
-# GPT Excel Processor
+# ⬆️⬇️ GPT Excel Processor
 
-This is a Streamlit-based application that processes Excel files containing prompts and parameters using OpenAI's GPT models. The app estimates the cost of processing based on the selected GPT model and allows you to download the processed file with GPT-generated responses.
+Table AI automatically populates your Excel tables using ChatGPT. Just upload your Excel file, and let the AI fill in the data. Once the process is complete, download the populated table with the generated results.
 
 ## Features
 
@@ -44,7 +44,7 @@ This is a Streamlit-based application that processes Excel files containing prom
 1. **Run the Streamlit app**:
 
    ```bash
-   streamlit run app.py
+   streamlit run table_ai.py
    ```
 
 2. **Access the app**:
