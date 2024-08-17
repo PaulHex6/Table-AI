@@ -1,6 +1,7 @@
-# ⬆️⬇️ GPT Excel Processor
+# 🔗 TableGen AI
 
-Table AI automatically populates your Excel tables using ChatGPT. Just upload your Excel file, and let the AI fill in the data. Once the process is complete, download the populated table with the generated results.
+TableGen AI automatically populates your Excel tables using ChatGPT. Just upload your Excel file, and let the AI fill in the data. Once the process is complete, download the populated table with the generated results.
+This is a preliminary version under development, and more updates are coming soon.
 
 ## Features
 
