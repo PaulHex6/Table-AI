@@ -1,4 +1,7 @@
 # 🔗 TableGen AI
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.0%2B-red)
+![License](https://img.shields.io/badge/License-Apache%202.0-green)
 
 TableGen AI automatically populates your Excel tables using ChatGPT. Just upload your Excel file, and let the AI fill in the data. Once the process is complete, download the populated table with the generated results.
 This is a preliminary version under development, and more updates are coming soon.
