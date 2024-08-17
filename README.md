@@ -110,8 +110,5 @@ After processing, the Excel file will be updated with the responses from GPT mod
 - **Scalability**: This structure allows you to easily scale the content generation by adding more parameters (rows) or prompts (columns).
 - **Efficiency**: The app automates the replacement of parameters in prompts and generates responses, saving time and ensuring consistency.
 
-## License
-
-This project is licensed under the MIT License.
 
 
