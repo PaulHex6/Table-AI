@@ -12,13 +12,12 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Function to get a reply from OpenAI
-def get_reply(prompt_template, parameter, model, system_context):
-    prompt = prompt_template.replace("{parameter}", parameter)
+def get_reply(prompt_template, model, system_context):
     try:
         chat_completion = client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_context},
-                {"role": "user", "content": prompt},
+                {"role": "user", "content": prompt_template},
             ],
             model=model,
         )
@@ -32,26 +31,6 @@ def load_file(uploaded_file):
         return pd.read_excel(uploaded_file, header=None, dtype=str, engine='openpyxl'), None
     except Exception as e:
         return None, f"Error loading Excel file: {e}"
-
-# Function to estimate the cost of processing
-def estimate_cost(df, model):
-    token_cost = {
-        "gpt-4o": {"input": 5.00, "output": 15.00},  # per 1M tokens
-        "gpt-4o-2024-08-06": {"input": 2.50, "output": 10.00},
-        "gpt-4o-mini": {"input": 0.15, "output": 0.60},
-        "chatgpt-4o-latest": {"input": 5.00, "output": 15.00},
-        "gpt-4-turbo": {"input": 10.00, "output": 30.00},
-    }
-    
-    # Estimate tokens based on text length (approx. 4 chars per token)
-    total_characters = sum(len(str(df.iloc[i, col])) for col in range(2, df.shape[1]) for i in range(2, df.shape[0]))
-    estimated_input_tokens = total_characters / 4
-    
-    # Calculate cost based on the model's input and output token prices
-    cost_input = (estimated_input_tokens / 1_000_000) * token_cost[model]["input"]
-    cost_output = (estimated_input_tokens / 1_000_000) * token_cost[model]["output"]
-    
-    return cost_input + cost_output
 
 # Function to refine system context using initial parameters and prompts
 def refine_context(initial_context, parameters, prompts):
@@ -122,11 +101,6 @@ if uploaded_file and client.api_key:
 # Display the text area widget with the current context
 context_prompt = st.text_area("Context for OpenAI API", value=st.session_state.context_area, height=200, key="context_area")
 
-# Estimate and display cost if file uploaded
-if uploaded_file:
-    estimated_cost = estimate_cost(df, model)
-    st.write(f"Estimated Cost for processing with {model}: ${estimated_cost:.4f}")
-
 # Debug checkbox widget
 debug = st.checkbox("Show Debug Info")
 
@@ -137,43 +111,71 @@ if st.button("Run"):
 
     st.write("Processing Data...")
 
-    parameters_start_row = 2
-    prompts_row = 1
-    
-    total_cells = (df.shape[0] - parameters_start_row) * (df.shape[1] - 2)
-    progress_bar = st.progress(0)
+    # Dynamically set starting rows and columns based on your DataFrame structure
+    parameters_start_row = 2  # Data starts from this row
+    prompts_row = 1  # Prompts are defined in this row
+
+    # Identify the first prompt column dynamically
+    first_prompt_col = 1
+    while first_prompt_col < df.shape[1] and pd.isna(df.iloc[prompts_row, first_prompt_col]):
+        first_prompt_col += 1
+
+    # Initialize progress tracking variables
     processed_cells = 0
+    total_cells = (df.shape[0] - parameters_start_row) * (df.shape[1] - first_prompt_col)
+    progress_bar = st.progress(0)
 
     # Iterate over each row and column, process data with GPT model
     for i in range(parameters_start_row, df.shape[0]):
-        parameter = df.iloc[i, 1]
-
         if debug:
-            st.write(f"Processing Row {i + 1}: Parameter = {parameter}")
-        
-        for col in range(2, df.shape[1]):
+            st.write("")
+            st.write("")
+            st.write(f"**Processing Row {i + 1}**") 
+
+        for col in range(first_prompt_col, df.shape[1]):
             prompt_template = df.iloc[prompts_row, col]
 
-            if debug:
-                st.write(f"Processing Column {col + 1}: Prompt = {prompt_template}")  
-            
-            if prompt_template and parameter:
-                result = get_reply(prompt_template, parameter, model, context_prompt)
-                
-                if debug:
-                    st.write(f"Generated Prompt: {prompt_template.replace('{parameter}', parameter)}")  
-                    st.write(f"GPT Response: {result}")  
-                
-                df.at[i, col] = result
+            if pd.notna(prompt_template):  # Ensure the prompt_template is not NaN
+                modified_prompt = prompt_template
 
-                processed_cells += 1
+                # Iterate over all parameter columns dynamically
+                for param_col in range(1, first_prompt_col):  # parameter columns are before first_prompt_col
+                    column_name = df.iloc[0, param_col]  # Get the column name from the header row
+                    placeholder = f"{{{column_name}}}"
+
+                    if placeholder in modified_prompt:
+                        # Replace placeholder with actual value from the current row
+                        column_value = str(df.iloc[i, param_col])
+                        modified_prompt = modified_prompt.replace(placeholder, column_value)
+
+                        if debug:
+                            st.write(f"Replaced {placeholder} with {column_value} in Prompt {col + 1}")
+
+                # Check if any replacement was done
+                if modified_prompt != prompt_template:
+                    if debug:
+                        st.write(f"Processed Prompt in Column {col + 1}: {modified_prompt}")
+
+                    # Get GPT response
+                    result = get_reply(modified_prompt, model, context_prompt)
+
+                    if debug:
+                        st.write(f"GPT Response: {result}")
+
+                    # Store the result in the DataFrame
+                    df.at[i, col] = result
+
+                processed_cells += 1  # Increment the processed cells count
                 progress_bar.progress(processed_cells / total_cells)
+
+    # Complete the progress bar
+    progress_bar.progress(100)
 
     if debug:
         st.write(f"Context: {context_prompt}")
         st.write("Final DataFrame:")
         st.dataframe(df)
-    
+
     # Allow user to download the processed file
     output = BytesIO()
     df.to_excel(output, index=False, header=False)

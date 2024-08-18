@@ -74,17 +74,19 @@ This is a preliminary version under development, and more updates are coming soo
 The Excel file you upload should be structured as follows:
 
 - **Row 1**: Contains headers (optional for your understanding, not used in processing).
-- **Row 2**: Contains the prompts where `{parameter}` is a placeholder for the dynamic content.
-- **Column A (starting from Row 3)**: Contains the parameters that will replace the `{parameter}` placeholder in the prompts.
-- **Column B and beyond (starting from Row 2)**: Contains the different prompt templates.
+- **Row 2**: Contains the prompts where `{parameter}` is a placeholder for dynamic content such as `{Fruit}`, `{Color}`, or `{Shape}`.
+- **Column A (starting from Row 3)**: Contains the parameter names that identify each row (e.g., `Parameter 1`, `Parameter 2`).
+- **Columns B and beyond (starting from Row 3)**: Contains the actual parameter values that will replace the `{parameter}` placeholders in the prompts (e.g., `Apple`, `Red`, `Round`).
 
 #### Example:
 
-|    A          |       B                                      |       C                                  |
-|---------------|----------------------------------------------|------------------------------------------|
-| Parameter 1   | Prompt 1                                      | Prompt 2                                  |
-| Review 1      | What is the sentiment of this review: {parameter}? | Generate a reply to this review: {parameter} |
-| Review 2      | What is the sentiment of this review: {parameter}? | Generate a reply to this review: {parameter} |
+|    A           |       B      |       C        |       D      |       E                     |       F                        |        G                       |
+|----------------|--------------|----------------|--------------|-----------------------------|--------------------------------|--------------------------------|
+| Index          | Fruit        | Color          | Shape        | Prompt 1                    | Prompt 2                       | Prompt 3                       |
+| None           | None         | None           | None         | What is {Fruit}?            | Why is {Fruit} {Color}?        | Why is {Fruit} {Shape}?        |
+| Parameter 1    | Apple        | Red            | Round        |                             |                                |                                |
+| Parameter 2    | Banana       | Yellow         | Long         |                             |                                |                                |
+| Parameter 3    | Grape        | Purple         | Ball         |                             |                                |                                |
 
 ### **Output Structure**:
 
@@ -92,17 +94,20 @@ After processing, the Excel file will be updated with the responses from GPT mod
 
 #### Example Output:
 
-|    A          |       B                                      |       C                                  |
-|---------------|----------------------------------------------|------------------------------------------|
-| Parameter 1   | Prompt 1                                      | Prompt 2                                  |
-| Review 1      | Positive sentiment                            | Thank you for your feedback! We're glad you enjoyed your experience. |
-| Review 2      | Negative sentiment                            | We're sorry to hear that you had a bad experience. We'll work on improving our service. |
+|    A           |       B      |       C        |       D      |       E                         |       F                               |        G                              |
+|----------------|--------------|----------------|--------------|---------------------------------|---------------------------------------|---------------------------------------|
+| Index          | Fruit        | Color          | Shape        | Prompt 1                        | Prompt 2                              | Prompt 3                              |
+| None           | None         | None           | None         | What is {Fruit}?                | Why is {Fruit} {Color}?               | Why is {Fruit} {Shape}?               |
+| Parameter 1    | Apple        | Red            | Round        | An edible fruit.                | Due to the presence of anthocyanins.  | Apple is round for uniform growth.    |
+| Parameter 2    | Banana       | Yellow         | Long         | A tropical fruit.               | Due to the presence of carotenoids.   | Bananas grow long for better sunlight |
+| Parameter 3    | Grape        | Purple         | Ball         | A small, juicy fruit.           | Due to anthocyanin pigments.          | Grapes are round for easy consumption.|
 
 ### **Explanation**:
 
-- **Row 2**: Defines the prompts with `{parameter}` as a placeholder.
-- **Column A**: Contains the parameters (e.g., `Review 1`, `Review 2`).
-- **Columns B and beyond**: Contain the responses generated by the selected GPT model, where the `{parameter}` placeholder in the prompts is replaced by the actual parameters from Column A.
+- **Row 2**: Defines the prompts with `{parameter}` as a placeholder. This allows for dynamic content to be inserted based on the parameters in the subsequent rows.
+- **Column A**: Contains the parameter names (e.g., `Parameter 1`, `Parameter 2`) which serve as identifiers for each set of values.
+- **Columns B, C, and D (starting from Row 3)**: These columns contain the actual values that will replace the placeholders `{Fruit}`, `{Color}`, and `{Shape}` in the prompts.
+- **Columns E, F, and G**: These columns contain the processed responses generated by the selected GPT model. The `{parameter}` placeholders in the prompts are dynamically replaced by the actual values from Columns B, C, and D.
 
 ## When to use it?
 
