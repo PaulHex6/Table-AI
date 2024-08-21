@@ -9,7 +9,8 @@ This is a preliminary version under development, and more updates are coming soo
 ## Features
 
 - **Upload Excel Files**: Upload an Excel file with predefined prompts and parameters.
-- **Model Selection**: Choose from various GPT models
+- **Model Selection**: Choose from various GPT models.
+- **Dynamic URL Processing**: Automatically fetch URLs for parameters starting with http:// or https://.
 - **Debug Information**: Optionally view detailed processing logs for each step.
 - **Download Processed File**: After processing, download the updated Excel file containing the GPT responses.
 
@@ -101,6 +102,11 @@ After processing, the Excel file will be updated with the responses from GPT mod
 | Parameter 1    | Apple        | Red            | Round        | An edible fruit.                | Due to the presence of anthocyanins.  | Apple is round for uniform growth.    |
 | Parameter 2    | Banana       | Yellow         | Long         | A tropical fruit.               | Due to the presence of carotenoids.   | Bananas grow long for better sunlight |
 | Parameter 3    | Grape        | Purple         | Ball         | A small, juicy fruit.           | Due to anthocyanin pigments.          | Grapes are round for easy consumption.|
+
+### **URL Fetching**:
+
+If any parameter value starts with http:// or https://, TableGen AI will automatically fetch the content of the web page, extract the unformatted text, and return it as the parameter value.
+
 
 ### **Explanation**:
 
