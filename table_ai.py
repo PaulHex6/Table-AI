@@ -153,9 +153,9 @@ def main():
     st.title('🔗 TableGen AI')
     st.write("Upload an Excel file with prompts and parameters.")
     
-    st.session_state.setdefault('refined_context', "")
+    #st.session_state.setdefault('refined_context', "")
     st.session_state.setdefault('last_uploaded_file', None)
-    st.session_state.setdefault('context_area', "")
+    st.session_state.setdefault('context_area', "You are working with an Excel file where each reply is in one cell. Provide concise and brief responses.")
 
     uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
 
@@ -175,10 +175,9 @@ def main():
         else:
             if uploaded_file != st.session_state.last_uploaded_file:
                 st.session_state.last_uploaded_file = uploaded_file
-                st.session_state.refined_context = extract_and_refine_context(df)
-                st.session_state.context_area = st.session_state.refined_context
+                #st.session_state.refined_context = extract_and_refine_context(df)
+                #st.session_state.context_area = st.session_state.refined_context
 
-    #context_prompt = st.text_area("Context for OpenAI API", value=st.session_state.context_area, height=200, key="context_area")
     context_prompt = st.text_area(
         "Context for OpenAI API", 
         value=st.session_state.get('context_area', ""), 
