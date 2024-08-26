@@ -119,7 +119,9 @@ def process_excel_file(df, model, context_prompt, debug):
                         modified_prompt = replace_placeholders(prompt_template, df, i, first_prompt_col, debug)
                         result = get_reply(modified_prompt, model, context_prompt)
 
+                        st.write(f"Prompt: {modified_prompt}")
                         st.write(f"GPT Response for Row {i + 1}, Column {col + 1}: {result}")
+                        st.write("")
 
                         df.at[i, col] = result
                         processed_cells += 1
@@ -145,8 +147,6 @@ def replace_placeholders(prompt_template, df, row_idx, first_prompt_col, debug):
             if debug:
                 st.write(f"Replaced {placeholder} with {column_value} in Prompt {param_col + 1}")
     return modified_prompt
-
-
 
 def main():
     """Main function to run the Streamlit app."""
@@ -181,8 +181,8 @@ def main():
 
     context_prompt = st.text_area(
         "Context for OpenAI API", 
-        value=st.session_state.get('context_area', ""), 
-        height=200, 
+        value="", 
+        height=150, 
         key="context_area"
     )
 
