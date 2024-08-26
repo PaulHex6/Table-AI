@@ -67,38 +67,6 @@ def extract_and_refine_context(df):
     )
     return refine_context(default_context, first_three_parameters, sample_prompts)
 
-def process_excel_file(df, model, context_prompt, debug):
-    """Process the Excel file and interact with the GPT model."""
-    parameters_start_row = 2
-    prompts_row = 1
-    first_prompt_col = find_first_prompt_column(df, prompts_row)
-
-    processed_cells = 0
-    total_cells = (df.shape[0] - parameters_start_row) * (df.shape[1] - first_prompt_col)
-    progress_bar = st.progress(0)
-
-    for i in range(parameters_start_row, df.shape[0]):
-        if debug:
-            st.write("") 
-            st.write(f"**Processing Row {i + 1}**") 
-
-        for col in range(first_prompt_col, df.shape[1]):
-            prompt_template = df.iloc[prompts_row, col]
-
-            if pd.notna(prompt_template):
-                modified_prompt = replace_placeholders(prompt_template, df, i, first_prompt_col, debug)
-                result = get_reply(modified_prompt, model, context_prompt)
-
-                if debug:
-                    st.write(f"GPT Response: {result}")
-
-                df.at[i, col] = result
-                processed_cells += 1
-                progress_bar.progress(processed_cells / total_cells)
-
-    progress_bar.progress(100)
-    return df
-
 def find_first_prompt_column(df, prompts_row):
     """Identify the first prompt column dynamically."""
     first_prompt_col = 1
@@ -129,6 +97,37 @@ def fetch_unformatted_text(url):
     except Exception as e:
         return f"Error fetching text from URL: {str(e)}"
 
+def process_excel_file(df, model, context_prompt, debug):
+    """Process the Excel file and interact with the GPT model."""
+    parameters_start_row = 2
+    prompts_row = 1
+    first_prompt_col = find_first_prompt_column(df, prompts_row)
+
+    processed_cells = 0
+    total_cells = (df.shape[0] - parameters_start_row) * (df.shape[1] - first_prompt_col)
+    progress_bar = st.progress(0)
+
+    for i in range(parameters_start_row, df.shape[0]):
+        if debug:
+            with st.expander(f"Processing Row {i + 1}"):
+                st.write(f"**Processing Row {i + 1}**") 
+
+                for col in range(first_prompt_col, df.shape[1]):
+                    prompt_template = df.iloc[prompts_row, col]
+
+                    if pd.notna(prompt_template):
+                        modified_prompt = replace_placeholders(prompt_template, df, i, first_prompt_col, debug)
+                        result = get_reply(modified_prompt, model, context_prompt)
+
+                        st.write(f"GPT Response for Row {i + 1}, Column {col + 1}: {result}")
+
+                        df.at[i, col] = result
+                        processed_cells += 1
+                        progress_bar.progress(processed_cells / total_cells)
+
+    progress_bar.progress(100)
+    return df
+
 def replace_placeholders(prompt_template, df, row_idx, first_prompt_col, debug):
     """Replace placeholders in the prompt template with actual values."""
     modified_prompt = prompt_template
@@ -146,6 +145,8 @@ def replace_placeholders(prompt_template, df, row_idx, first_prompt_col, debug):
             if debug:
                 st.write(f"Replaced {placeholder} with {column_value} in Prompt {param_col + 1}")
     return modified_prompt
+
+
 
 def main():
     """Main function to run the Streamlit app."""
