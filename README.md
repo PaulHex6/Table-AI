@@ -81,6 +81,8 @@ The Excel file you upload should be structured as follows:
 
 #### Example:
 
+You can refer to the example files in the `example-files` folder.
+
 |    A           |       B      |       C        |       D      |       E                     |       F                        |        G                       |
 |----------------|--------------|----------------|--------------|-----------------------------|--------------------------------|--------------------------------|
 | Index          | Fruit        | Color          | Shape        | Prompt 1                    | Prompt 2                       | Prompt 3                       |

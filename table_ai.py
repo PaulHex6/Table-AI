@@ -77,26 +77,26 @@ def find_first_prompt_column(df, prompts_row):
 # Dictionary to cache the results of fetched URLs
 url_cache = {}
 
+@st.cache_data(ttl=3600)  # Cache url for 1 hour
 def fetch_unformatted_text(url):
-    """Fetches the unformatted text content from a given URL. IMPORTANT: must start with http:// or https://"""
-
-    if url in url_cache:
-        return url_cache[url]
-
+    """Fetches the unformatted text content from a given URL with caching."""
     try:
-        # Send a GET request to the URL
-        response = requests.get(url)
-        response.raise_for_status()  # Check for request errors
+        # Send a GET request to the URL with a timeout
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
 
         # Parse the page content with BeautifulSoup
         soup = BeautifulSoup(response.content, 'html.parser')
 
         # Extract all the text without any formatting
         text = soup.get_text()
-        return text.strip()  # Return clean text
+        return text.strip()
+
+    except requests.exceptions.Timeout:
+        return "Error: Request timed out"
     except Exception as e:
         return f"Error fetching text from URL: {str(e)}"
-
+    
 def process_excel_file(df, model, context_prompt, debug):
     """Process the Excel file and interact with the GPT model."""
     parameters_start_row = 2
@@ -216,6 +216,10 @@ def main():
             st.write("Final DataFrame:")
             st.dataframe(df)
 
+        # Get the original filename and append "_processed"
+        original_filename = uploaded_file.name
+        processed_filename = f"{os.path.splitext(original_filename)[0]}_processed.xlsx"
+
         output = BytesIO()
         df.to_excel(output, index=False, header=False)
         output.seek(0)
@@ -224,7 +228,7 @@ def main():
         st.download_button(
             label="Download processed file",
             data=output,
-            file_name="processed_prompts.xlsx",
+            file_name=processed_filename,
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
