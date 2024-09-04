@@ -28,11 +28,19 @@ def get_reply(prompt_template, model, system_context):
         return f"Error: {str(e)}"
 
 def load_file(uploaded_file):
-    """Load an Excel file and return a DataFrame."""
+    """Load a CSV or Excel file and automatically detect the delimiter for CSV files."""
     try:
-        return pd.read_excel(uploaded_file, header=None, dtype=str, engine='openpyxl'), None
+        # Determine file type based on the file extension
+        if uploaded_file.name.endswith('.xlsx') or uploaded_file.name.endswith('.xls'):
+            return pd.read_excel(uploaded_file, header=None, dtype=str, engine='openpyxl'), None
+        elif uploaded_file.name.endswith('.csv'):
+            # Attempt to automatically detect delimiter using Python engine
+            return pd.read_csv(uploaded_file, header=None, dtype=str, sep=None, engine='python'), None
+        else:
+            return None, "Unsupported file format. Please upload a CSV or Excel file."
     except Exception as e:
-        return None, f"Error loading Excel file: {e}"
+        return None, f"Error loading file: {e}"
+
 
 def refine_context(initial_context, parameters, prompts):
     """Refine system context using initial parameters and prompts."""
@@ -60,8 +68,8 @@ def extract_and_refine_context(df):
     sample_prompts = [df.iloc[1, col] for col in range(2, min(5, df.shape[1]))]
 
     default_context = (
-        "You are working with an Excel file where each reply is one cell. "
-        "Provide concise and short replies suitable for an Excel cell. "
+        "You are working with a file where each reply is one cell. "
+        "Provide concise and short replies suitable for a cell. "
         "For numbers, only return numbers; for addresses, only the address. "
         "If unsure, leave the cell empty or use 'unknown'."
     )
@@ -98,7 +106,7 @@ def fetch_unformatted_text(url):
         return f"Error fetching text from URL: {str(e)}"
     
 def process_excel_file(df, model, context_prompt, debug):
-    """Process the Excel file and interact with the GPT model."""
+    """Process the file and interact with the GPT model."""
     parameters_start_row = 2
     prompts_row = 1
     first_prompt_col = find_first_prompt_column(df, prompts_row)
@@ -142,7 +150,6 @@ def process_excel_file(df, model, context_prompt, debug):
 
     return df
 
-
 def replace_placeholders(prompt_template, df, row_idx, first_prompt_col, debug_expander):
     """Replace placeholders in the prompt template with actual values."""
     modified_prompt = prompt_template
@@ -170,13 +177,13 @@ def main():
     """Main function to run the Streamlit app."""
     st.set_page_config(page_title='TableGen AI', page_icon='🔗')
     st.title('🔗 TableGen AI')
-    st.write("Upload an Excel file with prompts and parameters.")
+    st.write("Upload a CSV or Excel file with prompts and parameters.")
     
     #st.session_state.setdefault('refined_context', "")
     st.session_state.setdefault('last_uploaded_file', None)
-    st.session_state.setdefault('context_area', "You are working with an Excel file where each reply is in one cell. Provide concise and brief responses.")
+    st.session_state.setdefault('context_area', "You are working with a file where each reply is in one cell. Provide concise and brief responses.")
 
-    uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
+    uploaded_file = st.file_uploader("Choose a CSV or Excel file", type=["csv", "xlsx", "xls"])
 
     model = st.selectbox("Choose GPT Model", options=[
         "gpt-4o",

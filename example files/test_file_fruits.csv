@@ -1,0 +1,5 @@
+﻿Index,Fruit,Color name,Prompt 1,Prompt 2
+,,,What is {Fruit}?,Why is {Fruit} {Color name}?
+Parameter 1,Apple,Red,,
+Parameter 2,Banana,Yellow,,
+Parameter 2,Grape,Purple,,

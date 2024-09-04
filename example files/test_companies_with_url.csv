@@ -1,0 +1,5 @@
+﻿;Company;Website;Intro;Industry;Products;
+;;;Based on the information below, write a 10-word summary of what this company is: {Website};Based on the information below, describe the company's industry in up to 3 words: {Website};Based on the information below, list the 5 main products of this company: {Website};
+Parameter 1;Samsung;https://www.samsung.com;;;;
+Parameter 2;Intel Corporation;https://www.intel.com;;;;
+Parameter 3;Tesla, Inc.;https://www.tesla.com;;;;
