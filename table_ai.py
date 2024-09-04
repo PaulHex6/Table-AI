@@ -108,34 +108,48 @@ def process_excel_file(df, model, context_prompt, debug):
     progress_bar = st.progress(0)
 
     for i in range(parameters_start_row, df.shape[0]):
-        if debug:
-            with st.expander(f"Processing Row {i + 1}"):
-                st.write(f"**Processing Row {i + 1}**") 
+        # Create an expander if debug is enabled, otherwise it's None
+        debug_expander = st.expander(f"Processing Row {i + 1}") if debug else None
 
-                for col in range(first_prompt_col, df.shape[1]):
-                    prompt_template = df.iloc[prompts_row, col]
+        if debug_expander:
+            debug_expander.write(f"**Processing Row {i + 1}**")
 
-                    if pd.notna(prompt_template):
-                        modified_prompt = replace_placeholders(prompt_template, df, i, first_prompt_col, debug)
-                        result = get_reply(modified_prompt, model, context_prompt)
+        for col in range(first_prompt_col, df.shape[1]):
+            prompt_template = df.iloc[prompts_row, col]
 
-                        st.write(f"Prompt: {modified_prompt}")
-                        st.write(f"GPT Response for Row {i + 1}, Column {col + 1}: {result}")
-                        st.write("")
+            if pd.notna(prompt_template):
+                # Replace placeholders and pass the debug_expander
+                modified_prompt = replace_placeholders(prompt_template, df, i, first_prompt_col, debug_expander)
 
-                        df.at[i, col] = result
-                        processed_cells += 1
-                        progress_bar.progress(processed_cells / total_cells)
+                # Get GPT reply
+                result = get_reply(modified_prompt, model, context_prompt)
 
+                # Update the DataFrame with the result
+                df.at[i, col] = result
+
+                # Increment processed cells and update the progress bar
+                processed_cells += 1
+                progress_bar.progress(processed_cells / total_cells)
+
+                # Show debug information in the expander
+                if debug_expander:
+                    debug_expander.write(f"Prompt: {modified_prompt}")
+                    debug_expander.write(f"GPT Response for Row {i + 1}, Column {col + 1}: {result}")
+                    debug_expander.write("")
+
+    # Ensure the progress bar is set to 100% after processing
     progress_bar.progress(100)
+
     return df
 
-def replace_placeholders(prompt_template, df, row_idx, first_prompt_col, debug):
+
+def replace_placeholders(prompt_template, df, row_idx, first_prompt_col, debug_expander):
     """Replace placeholders in the prompt template with actual values."""
     modified_prompt = prompt_template
     for param_col in range(1, first_prompt_col):
         column_name = df.iloc[0, param_col]
         placeholder = f"{{{column_name}}}"
+
         if placeholder in modified_prompt:
             column_value = str(df.iloc[row_idx, param_col])
 
@@ -143,9 +157,13 @@ def replace_placeholders(prompt_template, df, row_idx, first_prompt_col, debug):
             if column_value.startswith(('http://', 'https://')):
                 column_value = fetch_unformatted_text(column_value)
 
+            # Replace the placeholder in the modified_prompt
             modified_prompt = modified_prompt.replace(placeholder, column_value)
-            if debug:
-                st.write(f"Replaced {placeholder} with {column_value} in Prompt {param_col + 1}")
+
+            # If debug_expander is active, write the replacement info
+            if debug_expander:
+                debug_expander.write(f"Replaced {placeholder} with {column_value} in Prompt {param_col + 1}")
+
     return modified_prompt
 
 def main():
